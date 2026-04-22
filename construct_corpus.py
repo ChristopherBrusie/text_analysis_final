@@ -38,7 +38,7 @@ import requests
 from bs4 import BeautifulSoup
 
 # ---------------------------------------------------------------------------
-# Configuration
+# Setting up some params
 # ---------------------------------------------------------------------------
 
 TARGET_PER_GENRE = 50
@@ -56,7 +56,7 @@ FICTION_DIR = os.path.join(OUTPUT_DIR, "fiction")
 NONFICTION_DIR = os.path.join(OUTPUT_DIR, "nonfiction")
 METADATA_PATH = os.path.join(OUTPUT_DIR, "metadata.csv")
 
-HEADERS = {"User-Agent": "GutenbergCorpusBuilder/1.0 (text-analysis research)"}
+HEADERS = {"User-Agent": "GutenbergCorpusBuilder/1.0 (test)"}
 
 # ---------------------------------------------------------------------------
 # Genre classification
@@ -64,6 +64,8 @@ HEADERS = {"User-Agent": "GutenbergCorpusBuilder/1.0 (text-analysis research)"}
 
 # Library of Congress Classification prefixes that indicate prose fiction
 # (excludes poetry P, drama, literary criticism — those land in AMBIGUOUS)
+# i found these here: https://www.loc.gov/catdir/cpso/lcco/
+
 FICTION_LOCC = {
     "PR",   # English literature (novels, short stories)
     "PS",   # American literature
@@ -73,7 +75,7 @@ FICTION_LOCC = {
     "PL",   # East Asian / African / Oceanic literatures
 }
 
-# LoCC prefixes that are reliably nonfiction
+# reliable nonfiction prefixes
 NONFICTION_LOCC = {
     "A",    # General works / encyclopaedias
     "B",    # Philosophy, psychology, religion
@@ -95,7 +97,7 @@ NONFICTION_LOCC = {
     "Z",    # Bibliography, library science
 }
 
-# Subject-keyword fallback when LoCC is absent or ambiguous
+# sometimes prefixes were absent or weird. then i fall back to these subject keywords. 
 FICTION_SUBJECT_KEYWORDS = [
     "fiction", "novel", "romance", "adventure stories",
     "detective", "mystery", "science fiction", "fantasy",
@@ -109,13 +111,14 @@ NONFICTION_SUBJECT_KEYWORDS = [
     "religion", "self-help", "nature", "medicine",
 ]
 
-# Subjects that mark poetry / drama — we skip these even inside fiction LoCC
+# skip these keywords because they could go either way, and i just dont want them
 SKIP_SUBJECT_KEYWORDS = [
     "poetry", "poems", "poetic", "drama", "plays", "verse",
     "epic", "sonnets", "ballads",
 ]
 
 
+# take in prefix and subject metadata, then classify as fiction, nonfiction or skip. 
 def classify(locc: str, subjects: str) -> str:
     """Return 'fiction', 'nonfiction', or 'skip'."""
     subjects_lower = subjects.lower()
@@ -144,7 +147,7 @@ def classify(locc: str, subjects: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Step 1: Download and parse the Gutenberg catalog
+# download the gutenberg catalog CSV and parse it. 
 # ---------------------------------------------------------------------------
 
 def fetch_catalog() -> dict[int, dict]:
@@ -183,7 +186,7 @@ def fetch_catalog() -> dict[int, dict]:
 
 
 # ---------------------------------------------------------------------------
-# Step 2: Scrape the top-books popularity ranking
+# scrape the top books popularity ranking. 
 # ---------------------------------------------------------------------------
 
 def fetch_top_ids() -> list[int]:
@@ -215,7 +218,7 @@ def fetch_top_ids() -> list[int]:
 
 
 # ---------------------------------------------------------------------------
-# Step 3: Download a single book as plain text
+# download the UTF8 plain text for a single book. 
 # ---------------------------------------------------------------------------
 
 CANDIDATE_URLS = [
